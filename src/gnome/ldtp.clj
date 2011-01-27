@@ -38,13 +38,15 @@
     arguments, and number of default args. See also
     http://ldtp.freedesktop.org/user-doc/index.html"
   [specfile]
-    (let [methods (with-in-str (slurp specfile) (read))
-          defs (map
-		(fn [[fnname [args num-optional-args]]]
-		  (let [argsyms (map symbol args)
-			num-required-args (- (count args) num-optional-args)
-			arity-arg-counts (range num-required-args (inc (count args)))
-			arities (for [arity arity-arg-counts] (xmlrpcmethod-arity fnname argsyms arity))]
+  (let [methods (-> (ClassLoader/getSystemClassLoader)
+                    (.getResourceAsStream specfile)
+                    InputStreamReader. PushbackReader. read)
+        defs (map
+              (fn [[fnname [args num-optional-args]]]
+                (let [argsyms (map symbol args)
+                      num-required-args (- (count args) num-optional-args)
+                      arity-arg-counts (range num-required-args (inc (count args)))
+                      arities (for [arity arity-arg-counts] (xmlrpcmethod-arity fnname argsyms arity))]
 			
 		    `(defn ~(symbol fnname)
 		        ~@arities
@@ -60,7 +62,7 @@
 ;;by this python script:
 ;;https://github.com/weissjeffm/ldtp-server/blob/master/extract-api.py
 ;;see resources/prettify.clj to save in readable format
-(defxmlrpc "resources/ldtp_api.clj")
+(defxmlrpc "ldtp_api.clj")
 
 (defn action [uifn arg1 & args]
   (let [ids (if (satisfies? LDTPLocatable arg1) (locator arg1) (list arg1))]
