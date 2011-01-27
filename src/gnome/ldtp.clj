@@ -1,6 +1,7 @@
 (ns gnome.ldtp
   (:require [clojure.contrib.logging :as log])
-  (:import [org.apache.xmlrpc.client XmlRpcClient XmlRpcClientConfigImpl]))
+  (:import [org.apache.xmlrpc.client XmlRpcClient XmlRpcClientConfigImpl]
+           [java.io PushbackReader InputStreamReader]))
 
 (defprotocol LDTPLocatable
   (locator [x]))
