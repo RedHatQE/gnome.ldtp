@@ -66,9 +66,15 @@
 (defxmlrpc "ldtp_api.clj")
 
 (defn action [uifn arg1 & args]
-  (let [ids (if (satisfies? LDTPLocatable arg1) (locator arg1) (list arg1))]
-     (log/info (str "Action: " (:name (meta uifn)) ids " " args))
-     (apply uifn (concat ids args))))
+  (let [ids (if (satisfies? LDTPLocatable arg1) (locator arg1) (list arg1))
+        result (atom "Error")]
+    (try
+      (reset! result (apply uifn (concat ids args)) )
+      (finally
+       (log/info (str "Action: " (:name (meta uifn)) ids " " args ", Result: "
+                      @result))))))
+
+
 ;; Some higher level convenience functions that aren't supplied directly by ldtp
 
 (defn- waittillwindow [windowid seconds exist?]
