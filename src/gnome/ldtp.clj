@@ -65,11 +65,14 @@
 ;;see resources/prettify.clj to save in readable format
 (defxmlrpc "ldtp_api.clj")
 
-(defn action [uifn arg1 & args]
-  (let [ids (if (satisfies? LDTPLocatable arg1) (locator arg1) (list arg1))
+(defn action [uifn & args]
+  (let [arg1 (first args)
+        ids (if (satisfies? LDTPLocatable arg1)
+              (locator arg1)
+              (if (nil? arg1) '() (list arg1)))
         result (atom "Error")]
     (try
-      (reset! result (apply uifn (concat ids args)) )
+      (reset! result (apply uifn (concat ids (rest args))))
       (finally
        (log/info (str "Action: " (:name (meta uifn)) ids " " args ", Result: "
                       @result))))))
