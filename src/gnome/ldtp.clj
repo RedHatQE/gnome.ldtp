@@ -101,3 +101,16 @@
 (defn rowexist? [windowid objectid row]
   (bool (doesrowexist windowid objectid row)))
 
+(defmacro loop-with-timeout [timeout bindings & forms]
+  `(let [starttime# (System/currentTimeMillis)]
+     (loop ~bindings
+       (if  (> (- (System/currentTimeMillis) starttime#) ~timeout)
+	 0)
+	 (do ~@forms))))
+
+(defn waittillshowing [windowid objectid s]
+  (loop-with-timeout (* s 1000) []
+     (if-not (showing? windowid objectid)
+           (do (Thread/sleep 500)
+               (recur))
+           1)))
