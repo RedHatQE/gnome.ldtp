@@ -105,8 +105,8 @@
   `(let [starttime# (System/currentTimeMillis)]
      (loop ~bindings
        (if  (> (- (System/currentTimeMillis) starttime#) ~timeout)
-	 0)
-	 (do ~@forms))))
+	 0
+	 (do ~@forms)))))
 
 (defn waittillshowing [windowid objectid s]
   (loop-with-timeout (* s 1000) []
