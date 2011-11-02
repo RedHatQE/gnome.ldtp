@@ -114,3 +114,10 @@
            (do (Thread/sleep 500)
                (recur))
            1)))
+           
+(defn waittillnotshowing [windowid objectid s]
+  (loop-with-timeout (* s 1000) []
+     (if (showing? windowid objectid)
+           (do (Thread/sleep 500)
+               (recur))
+           1)))
