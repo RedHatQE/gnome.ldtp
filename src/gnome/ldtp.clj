@@ -22,6 +22,7 @@
   (let [config (XmlRpcClientConfigImpl.)
         xclient (XmlRpcClient.)]
     (comment (.setServerURL config (java.net.URL. url)))
+    (.setEnabledForExtensions config true)
     (.setConfig xclient config)
     xclient))
 
