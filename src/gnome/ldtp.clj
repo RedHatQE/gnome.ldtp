@@ -1,7 +1,9 @@
 (ns gnome.ldtp
-  (:require [clojure.tools.logging :as log])
-  (:import [org.apache.xmlrpc.client XmlRpcClient XmlRpcClientConfigImpl]
-           [java.io PushbackReader InputStreamReader]))
+  (:require [clojure.tools.logging :as log]
+            [necessary-evil.core :as xml-rpc])
+  (:import
+   ;[org.apache.xmlrpc.client XmlRpcClient XmlRpcClientConfigImpl]
+   [java.io PushbackReader InputStreamReader]))
 
 (defprotocol LDTPLocatable
   (locator [x]))
@@ -18,20 +20,22 @@
 (defrecord Tab [tabgroup id] LDTPLocatable
   (locator [this] (conj (locator tabgroup) id)))
 
-(def client 
-  (let [config (XmlRpcClientConfigImpl.)
-        xclient (XmlRpcClient.)]
-    (comment (.setServerURL config (java.net.URL. url)))
-    (.setEnabledForExtensions config true)
-    (.setConfig xclient config)
-    xclient))
+(comment ;old way using apache xmlrpc client
+  (def client 
+    (let [config (XmlRpcClientConfigImpl.)
+          xclient (XmlRpcClient.)]
+      (comment (.setServerURL config (java.net.URL. url)))
+      (.setEnabledForExtensions config true)
+      (.setConfig xclient config)
+      xclient)))
+
+(def client (atom nil))
 
 (defn- xmlrpcmethod-arity "Generate code for one arity of xmlrpc method."
   [fnname argsyms n]
   (let [theseargs (take n argsyms)]
     `(~(vec theseargs)
-     (clojure.lang.Reflector/invokeInstanceMethod
-      client "execute" (to-array (list ~fnname ~(concat '(list) theseargs)))))) )
+      (xml-rpc/call @client ~fnname ~@theseargs))))
 
 (defmacro defxmlrpc
   "Generate functions corresponding to an xmlrpc API (in this case,
@@ -49,7 +53,7 @@
                       num-required-args (- (count args) num-optional-args)
                       arity-arg-counts (range num-required-args (inc (count args)))
                       arities (for [arity arity-arg-counts] (xmlrpcmethod-arity fnname argsyms arity))]
-			
+                  
 		    `(defn ~(symbol fnname)
 		        ~@arities
 		       )))
@@ -57,14 +61,19 @@
       `(do
          ~@defs)))
 
-(defn set-url [url]
-  (.setServerURL (.getConfig client) (java.net.URL. url)))
+(comment ;old way using apache xmlrpc client
+  (defn set-url [url]
+    (.setServerURL (.getConfig client) (java.net.URL. url))))
+
+(defn set-url [url] (reset! client url))
 
 ;;Generate all LDTP functions from the specfile.  Specfile is produced
 ;;by this python script:
 ;;https://github.com/weissjeffm/ldtp-server/blob/master/extract-api.py
 ;;see resources/prettify.clj to save in readable format
 (defxmlrpc "ldtp_api.clj")
+
+(defn get-fn-name [func] (second (clojure.string/split (str func) #"\$|@")))
 
 (defn action [uifn & args]
   (let [arg1 (first args)
@@ -75,7 +84,7 @@
     (try
       (reset! result (apply uifn (concat ids (rest args))))
       (finally
-       (log/info (str "Action: " (:name (meta uifn)) ids " " args ", Result: "
+       (log/info (str "Action: " (get-fn-name uifn) " " args ", Result: "
                       @result))))))
 
 
