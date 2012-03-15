@@ -83,8 +83,10 @@
         result (atom "Error")]
     (try
       (reset! result (apply uifn (concat ids (rest args))))
+      (if (necessary-evil.fault/fault? @result)
+        (throw (Exception. (:fault-string @result))))
       (finally
-       (log/info (str "Action: " (get-fn-name uifn) " " args ", Result: "
+       (log/info (str "Action: " (get-fn-name uifn) " " ids args ", Result: "
                       @result))))))
 
 
