@@ -84,11 +84,11 @@
     (try
       (reset! result (apply uifn (concat ids (rest args))))
       (if (necessary-evil.fault/fault? @result)
-        (throw (Exception. (:fault-string @result))))
+        (throw (Exception. (:fault-string @result)))
+        @result)
       (finally
        (log/info (str "Action: " (get-fn-name uifn) " " ids args ", Result: "
                       @result))))))
-
 
 ;; Some higher level convenience functions that aren't supplied directly by ldtp
 
@@ -104,14 +104,20 @@
 (defn- bool [i]
   (= 1 i))
 
-(defn exists? [windowid objectid]
-  (bool (objectexist windowid objectid)))
+(defn exists? [windowid objectid & {:keys [silent?] :or {silent? false}}]
+  (if silent?
+    (bool (objectexist windowid objectid))
+    (bool (action objectexist windowid objectid))))
 
-(defn showing? [windowid objectid]
-  (bool (hasstate windowid objectid "SHOWING")))
+(defn showing? [windowid objectid & {:keys [silent?] :or {silent? false}}]
+  (if silent?
+    (bool (hasstate windowid objectid "SHOWING"))
+    (bool (action hasstate windowid objectid "SHOWING"))))
 
-(defn rowexist? [windowid objectid row]
-  (bool (doesrowexist windowid objectid row)))
+(defn rowexist? [windowid objectid row & {:keys [silent?] :or {silent? false}}]
+  (if silent?
+    (bool (doesrowexist windowid objectid row))
+    (bool (action doesrowexist windowid objectid row))))
 
 (defmacro loop-with-timeout [timeout bindings & forms]
   `(let [starttime# (System/currentTimeMillis)]
@@ -122,14 +128,14 @@
 
 (defn waittillshowing [windowid objectid s]
   (loop-with-timeout (* s 1000) []
-     (if-not (showing? windowid objectid)
+     (if-not (showing? windowid objectid :silent? true)
            (do (Thread/sleep 500)
                (recur))
            1)))
            
 (defn waittillnotshowing [windowid objectid s]
   (loop-with-timeout (* s 1000) []
-     (if (showing? windowid objectid)
+     (if (showing? windowid objectid :silent? true)
            (do (Thread/sleep 500)
                (recur))
            1)))
