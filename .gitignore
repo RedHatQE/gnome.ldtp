@@ -1,0 +1,17 @@
+.project
+.classpath
+.lein-deps-sum
+pom.xml
+bin
+classes
+checkouts
+test-output
+target
+lib
+tmp/*
+
+# editor files
+*~
+\#*
+*.swp
+*.swo
