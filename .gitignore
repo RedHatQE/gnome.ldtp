@@ -1,6 +1,7 @@
 .project
 .classpath
 .lein-deps-sum
+.pydevproject
 pom.xml
 bin
 classes
@@ -10,8 +11,12 @@ target
 lib
 tmp/*
 
-# editor files
+## editor files
 *~
 \#*
+.\#*
 *.swp
 *.swo
+
+## for plugin settings like counter-clockwise
+.settings
