@@ -10,6 +10,8 @@ test-output
 target
 lib
 tmp/*
+resources/ldtp_api_pretty.clj
+resources/ldtp_api_raw.clj
 
 ## editor files
 *~
