@@ -5,6 +5,7 @@ import ldtp
 #This program is to extract the api out of the loaded ldtp library using introspection.
 #This is mostly helpful whenever ldtp updates or a new version comes out.
 
+#This section works on ldtp v1
 #xmlrpc = XMLRPCLdtpd()
 names = filter(lambda fn: inspect.isfunction(getattr(ldtp,fn)),  dir(ldtp))
 #names = map(lambda n: n.split("xmlrpc_")[1], public_apis) #strip prefix off fn names
