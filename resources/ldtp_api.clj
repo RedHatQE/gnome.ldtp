@@ -151,6 +151,7 @@
  ("unselectindex" [["window_name" "object_name" "item_index"] 0])
  ("unselectitem" [["window_name" "object_name" "item_name"] 0])
  ("verifycheck" [["window_name" "object_name"] 0])
+ ("verifycheckrow" [["window_name" "object_name" "row_index" "column_index"] 1])
  ("verifydropdown" [["window_name" "object_name"] 0])
  ("verifyhidelist" [["window_name" "object_name"] 0])
  ("verifymenucheck" [["window_name" "object_name"] 0])
@@ -175,6 +176,7 @@
  ("verifytabname" [["window_name" "object_name" "tab_name"] 0])
  ("verifytoggled" [["window_name" "object_name"] 0])
  ("verifyuncheck" [["window_name" "object_name"] 0])
+ ("verifyuncheckrow" [["window_name" "object_name" "row_index" "column_index"] 1]
  ("wait" [["timeout"] 1])
  ("waittillguiexist"
   [["window_name" "object_name" "guiTimeOut" "state"] 3])
