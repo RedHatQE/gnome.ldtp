@@ -176,7 +176,7 @@
  ("verifytabname" [["window_name" "object_name" "tab_name"] 0])
  ("verifytoggled" [["window_name" "object_name"] 0])
  ("verifyuncheck" [["window_name" "object_name"] 0])
- ("verifyuncheckrow" [["window_name" "object_name" "row_index" "column_index"] 1]
+ ("verifyuncheckrow" [["window_name" "object_name" "row_index" "column_index"] 1])
  ("wait" [["timeout"] 1])
  ("waittillguiexist"
   [["window_name" "object_name" "guiTimeOut" "state"] 3])
