@@ -20,15 +20,6 @@
 (defrecord Tab [tabgroup id] LDTPLocatable
   (locator [this] (conj (locator tabgroup) id)))
 
-(comment ;old way using apache xmlrpc client
-  (def client 
-    (let [config (XmlRpcClientConfigImpl.)
-          xclient (XmlRpcClient.)]
-      (comment (.setServerURL config (java.net.URL. url)))
-      (.setEnabledForExtensions config true)
-      (.setConfig xclient config)
-      xclient)))
-
 (def client (atom nil))
 
 (defn- xmlrpcmethod-arity "Generate code for one arity of xmlrpc method."
@@ -53,7 +44,7 @@
                       num-required-args (- (count args) num-optional-args)
                       arity-arg-counts (range num-required-args (inc (count args)))
                       arities (for [arity arity-arg-counts] (xmlrpcmethod-arity fnname argsyms arity))]
-                  
+
 		    `(defn ~(symbol fnname)
 		        ~@arities
 		       )))
@@ -132,10 +123,23 @@
            (do (Thread/sleep 500)
                (recur))
            1)))
-           
+
 (defn waittillnotshowing [windowid objectid s]
   (loop-with-timeout (* s 1000) []
      (if (showing? windowid objectid :silent? true)
            (do (Thread/sleep 500)
                (recur))
            1)))
+
+(defn windows-exist
+  "Checks if any window in coll exist within s time. Returns the windows found "
+  [coll s]
+  (let [results (loop-with-timeout (* s 1000) [windows (getwindowlist)]
+                                   (let [found (set (clojure.set/intersection
+                                                     (set coll)
+                                                     (set windows)))]
+                                     (if-not (boolean found)
+                                       (do (Thread/sleep 500)
+                                           (recur (getwindowlist)))
+                                       found)))]
+    results))
