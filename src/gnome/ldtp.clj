@@ -138,7 +138,7 @@
                                    (let [found (set (clojure.set/intersection
                                                      (set coll)
                                                      (set windows)))]
-                                     (if-not (boolean found)
+                                     (if (empty? found)
                                        (do (Thread/sleep 500)
                                            (recur (getwindowlist)))
                                        found)))]
