@@ -142,4 +142,7 @@
                                        (do (Thread/sleep 500)
                                            (recur (getwindowlist)))
                                        found)))]
-    results))
+    (if (= 0 results)
+      #{} ;returns an empty set
+      results ;else returns the set
+      )))
