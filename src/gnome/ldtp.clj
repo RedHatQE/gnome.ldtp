@@ -45,12 +45,12 @@
                       arity-arg-counts (range num-required-args (inc (count args)))
                       arities (for [arity arity-arg-counts] (xmlrpcmethod-arity fnname argsyms arity))]
 
-		    `(defn ~(symbol fnname)
-		        ~@arities
-		       )))
-		methods)]
-      `(do
-         ~@defs)))
+                  `(defn ~(symbol fnname)
+                     ~@arities
+                     )))
+              methods)]
+    `(do
+       ~@defs)))
 
 (comment ;old way using apache xmlrpc client
   (defn set-url [url]
