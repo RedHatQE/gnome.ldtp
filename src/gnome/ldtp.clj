@@ -22,11 +22,21 @@
 
 (def client (atom nil))
 
-(defn- xmlrpcmethod-arity "Generate code for one arity of xmlrpc method."
+;;Generate code for one arity of xmlrpc method.
+(defn- xmlrpcmethod-arity 
   [fnname argsyms n]
   (let [theseargs (take n argsyms)]
     `(~(vec theseargs)
       (xml-rpc/call @client ~fnname ~@theseargs))))
+
+(defn defxmlrpc-method [[fnname [args num-optional-args]]]
+  (let [argsyms (map symbol args)
+        num-required-args (- (count args) num-optional-args)
+        arity-arg-counts (range num-required-args (inc (count args)))
+        arities (for [arity arity-arg-counts] (xmlrpcmethod-arity fnname argsyms arity))]
+    `(defn ~(symbol fnname)
+       ~@arities
+       )))
 
 (defmacro defxmlrpc
   "Generate functions corresponding to an xmlrpc API (in this case,
@@ -38,19 +48,9 @@
   (let [methods (-> (ClassLoader/getSystemClassLoader)
                     (.getResourceAsStream specfile)
                     InputStreamReader. PushbackReader. read)
-        defs (map
-              (fn [[fnname [args num-optional-args]]]
-                (let [argsyms (map symbol args)
-                      num-required-args (- (count args) num-optional-args)
-                      arity-arg-counts (range num-required-args (inc (count args)))
-                      arities (for [arity arity-arg-counts] (xmlrpcmethod-arity fnname argsyms arity))]
-
-		    `(defn ~(symbol fnname)
-		        ~@arities
-		       )))
-		methods)]
-      `(do
-         ~@defs)))
+        defs (map defxmlrpc-method methods)]
+    `(do
+       ~@defs)))
 
 (comment ;old way using apache xmlrpc client
   (defn set-url [url]
@@ -75,7 +75,8 @@
     (try
       (reset! result (apply uifn (concat ids (rest args))))
       (if (necessary-evil.fault/fault? @result)
-        (throw (Exception. (:fault-string @result)))
+        (do (log/info (format "Fault in return: %s" (:fault-string @result)))
+            (throw (Exception. (:fault-string @result))))
         @result)
       (finally
        (log/info (str "Action: " (get-fn-name uifn) " " ids args ", Result: "
